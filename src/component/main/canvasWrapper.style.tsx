@@ -1,14 +1,13 @@
 import styled from "styled-components";
+const margin = 60
 const CanvasWrapperStyle = styled.div`
-  margin: 60px;
-  border: 1px solid red;
+  margin: ${margin}px;
   overflow: auto;
-  max-width: 500px;
-
+  height: calc(100vh - 184px);
+  position: relative;
+  border: 1px solid rgba(5, 5, 5, 0.1);
   .canvas {
-    width: 10000px;
-    height: 500px;
-
+    position: absolute;
   }
 `
 export default CanvasWrapperStyle

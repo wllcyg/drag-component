@@ -4,6 +4,7 @@ type DrawerWrapperProps = {
   animationDuration?: number;
   isOpen:boolean
 };
+const btnShaw = `0 2px 5px rgba(0, 0, 0, 0.3)`
 const DrawerWrapper = styled.div<DrawerWrapperProps>`
   width: ${({width, isOpen}) => {
     return isOpen ? width : 2
@@ -11,6 +12,8 @@ const DrawerWrapper = styled.div<DrawerWrapperProps>`
   background-color: #fff;
   position: relative;
   transition: all 0.6s;
+  box-shadow: ${btnShaw};
+
   .options-btn {
     position: absolute;
     background-color: #fff;
@@ -21,6 +24,7 @@ const DrawerWrapper = styled.div<DrawerWrapperProps>`
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    box-shadow:${btnShaw};
   }
 
   .left {
@@ -35,5 +39,7 @@ const DrawerWrapper = styled.div<DrawerWrapperProps>`
     border-bottom-left-radius: 16px;
   }
 `
+
+
 
 export default DrawerWrapper

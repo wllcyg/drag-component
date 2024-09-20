@@ -1,5 +1,7 @@
 import DrawerWrapper from "@/component/drawer/style.tsx";
 import {RightCircleOutlined} from "@ant-design/icons";
+import {slideWidth} from "@/config.ts";
+
 import classNames from "classnames";
 import React, {useEffect, useState} from "react";
 type DrawerProps = {
@@ -8,7 +10,7 @@ type DrawerProps = {
   animationDuration?:number,
   children?: React.ReactNode;
 }
-const Drawer = ({ position,width=220,animationDuration=1,children }:DrawerProps) => {
+const Drawer = ({ position,width=slideWidth,animationDuration=1,children }:DrawerProps) => {
   const iconClass = classNames('options-btn',position)
   const [isOpen, setIsOpen] = useState(true)
   const [rotate, setRotate] = useState(0)

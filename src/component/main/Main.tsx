@@ -3,7 +3,9 @@ const Main = ({className}:{className?:string}) => {
   return (
     <div className={className}>
       <CanvasWrapperStyle>
-        <div className='canvas'></div>
+        <canvas className='canvas' >
+
+        </canvas>
       </CanvasWrapperStyle>
     </div>
   );
