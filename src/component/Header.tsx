@@ -1,8 +1,7 @@
-import { Button } from 'antd';
-const Header = () => {
+const Header = ({className}:{className?:string}) => {
   return (
-    <div>
-      <Button type='primary'> this is editButton </Button>
+    <div className={className}>
+
     </div>
   );
 };
