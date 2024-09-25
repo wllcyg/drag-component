@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>request</h1>
+<script>
+
+    const total = 1000
+    const arr = []
+
+    function generateArr(total) {
+        for (let i = 0; i < total; i++) {
+            arr.push(function () {
+                document.body.innerHTML += `<div>${i + 1}</div>`
+            })
+        }
+    }
+
+    generateArr(total)
+
+    function workLoop(deadline) {
+        if (deadline.timeRemaining() > 1 && arr.length > 0) {
+            const fn = arr.shift()
+            fn()
+        }
+        requestIdleCallback(workLoop)
+    }
+
+    // 关于requestIdleCallback
+    const channel = new MessageChannel()
+    const port1 = channel.port1
+    const port2 = channel.port2
+    port1.onmessage = (e) => {
+        console.log(e.data)
+        port1.postMessage('信息来自port1')
+    }
+    port2.onmessage = (e) => {
+        console.log(e.data, 'received by port2')
+    }
+    port2.postMessage('hello')
+
+
+    // 模拟request
+    const ImmediatePriority = 1; // 立即执行的优先级, 级别最高 [点击事件，输入框，]
+    const UserBlockingPriority = 2; // 用户阻塞级别的优先级, [滚动，拖拽这些]
+    const NormalPriority = 3; // 正常的优先级 [redner 列表 动画 网络请求]
+    const LowPriority = 4; // 低优先级  [分析统计]
+    const IdlePriority = 5;// 最低阶的优先级, 可以被闲置的那种 [console.log]
+    function getCurrentTime() {
+        return performance.now()
+    }
+
+    // 调度类名
+    class SimpleScheduler {
+        constructor() {
+            this.taskQueue = []
+            this.isPerformWork = false
+            const channel = new MessageChannel()
+            this.port = channel.port2
+            channel.port1.onmessage = this.performWorkUntilDeadline.bind(this);
+        }
+
+        // 创建调度任务
+        scheduleCallback(priorityLevel, callback) {
+            const currentTime = getCurrentTime()
+            let timeout;
+            // 根据优先级设置超时时间
+            switch (priorityLevel) {
+                case ImmediatePriority:
+                    timeout = -1;
+                    break;
+                case UserBlockingPriority:
+                    timeout = 250;
+                    break;
+                case LowPriority:
+                    timeout = 10000;
+                    break;
+                case IdlePriority:
+                    timeout = 1073741823;
+                    break;
+                case NormalPriority:
+                default:
+                    timeout = 5000;
+                    break;
+            }
+            const task = {
+                callback,
+                priorityLevel,
+                expirationTime: currentTime + timeout,
+            }
+            this.push(this.taskQueue, task)
+            this.schedulePerformWorkUntilDeadline()
+        }
+        push(queue,task) {
+            queue.push(task)
+            queue.sort((a, b) => a.expirationTime - b.expirationTime);
+        }
+        pop(queue) {
+            return queue.shift()
+        }
+        peek(queue){
+            return queue[0] || null
+        }
+        schedulePerformWorkUntilDeadline(){
+            if (!this.isPerformWork){
+                this.isPerformWork = true
+                this.port.postMessage(null)
+            }
+        }
+        // 执行任务
+        performWorkUntilDeadline() {
+            this.isPerformWork = true;
+            this.workLoop();
+            this.isPerformWork = false;
+        }
+       workLoop() {
+            let curTask = this.peek(this.taskQueue);
+            while (curTask) {
+                const callback = curTask.callback;
+                if (typeof callback === 'function') {
+                  callback()// 执行任务
+                }
+                this.pop(this.taskQueue); // 移除已完成任务
+                curTask = this.peek(this.taskQueue); // 获取下一个任务
+            }
+        }
+    }
+    const scheduler = new SimpleScheduler();
+    console.log(scheduler)
+    scheduler.scheduleCallback(LowPriority, () => {
+        console.log('Task 1: Low Priority');
+    });
+
+    scheduler.scheduleCallback(ImmediatePriority, () =>{
+        setTimeout(() => {
+            console.log(222222)
+        },10)
+    });
+
+    scheduler.scheduleCallback(IdlePriority, () => {
+        console.log('Task 3: Idle Priority');
+    });
+
+    scheduler.scheduleCallback(UserBlockingPriority, () => {
+        console.log('Task 4: User Blocking Priority');
+    });
+
+    scheduler.scheduleCallback(NormalPriority, () => {
+        console.log('Task 5: Normal Priority');
+    });
+</script>
+</body>
+</html>
